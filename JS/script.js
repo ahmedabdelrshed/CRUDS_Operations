@@ -28,7 +28,7 @@ let products = [];
 
 if (localStorage.Products != null) {
   products = JSON.parse(localStorage.Products);
-  showProducts();
+  showProducts(products);
 }
 
 //  Create Product
@@ -43,22 +43,25 @@ submit.onclick = () => {
     Category: Category.value,
     total: total.innerHTML,
   };
-  if (type_Of_Operation == "Create") {
-    if (newProduct.count > 1) {
-      for (let index = 0; index < newProduct.count; index++) {
+  if (title.value != "" && price.value != "" && Category.value != "" && count.value <=100) {
+    if (type_Of_Operation == "Create") {
+      if (newProduct.count > 1) {
+        for (let index = 0; index < newProduct.count; index++) {
+          products.push(newProduct);
+        }
+      } else {
         products.push(newProduct);
       }
     } else {
-      products.push(newProduct);
+      products[index_Of_Product_Update] = newProduct;
+      submit.innerHTML = "Create";
+      count.style.display = "block";
     }
-  } else {
-    products[index_Of_Product_Update] = newProduct;
-    submit.innerHTML = "Create";
-    count.style.display = "block";
+  clear();
+
   }
   localStorage.setItem("Products", JSON.stringify(products));
-  clear();
-  showProducts();
+  showProducts(products);
   getTotalPrice();
 };
 
@@ -76,7 +79,7 @@ function clear() {
 }
 
 // Show Products
-function showProducts() {
+function showProducts(products) {
   table.innerHTML = "";
   for (let i = 0; i < products.length; i++) {
     table.innerHTML += `
@@ -107,13 +110,13 @@ function showProducts() {
 function deleteProduct(index) {
   products.splice(index, 1);
   localStorage.Products = JSON.stringify(products);
-  showProducts();
+  showProducts(products);
 }
 
 function deleteAllProducts() {
   products.splice(0);
   localStorage.clear();
-  showProducts();
+  showProducts(products);
 }
 
 // Update Products
@@ -134,4 +137,38 @@ function updateProduct(index) {
     top: 0,
     behavior: "smooth",
   });
+}
+
+//  Search
+let SEARCH_BY = "title";
+let input_search = document.getElementById("search");
+
+function searchMood(id) {
+  input_search.focus();
+  if (id == "searchTitle") {
+    SEARCH_BY = "title";
+  } else {
+    SEARCH_BY = "category";
+  }
+  input_search.placeholder = "Search By " + SEARCH_BY;
+  showProducts(products);
+  input_search.value = "";
+}
+
+input_search.onkeyup = search;
+
+function search() {
+  let result_products = [];
+  for (p in products) {
+    if (SEARCH_BY == "title") {
+      if (products[p].title.includes(input_search.value.toLowerCase())) {
+        result_products.push(products[p]);
+      }
+    } else {
+      if (products[p].Category.includes(input_search.value.toLowerCase())) {
+        result_products.push(products[p]);
+      }
+    }
+  }
+  showProducts(result_products);
 }
